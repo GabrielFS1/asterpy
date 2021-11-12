@@ -9,7 +9,7 @@
     - [Parametros Editáveis](Parametros-Editáveis)
 
 ## Instalação
-*Você precisará do software [Visual Studio Code](https://code.visualstudio.com/Download) instalado. Além da linguagem de programação [Python](https://www.python.org/downloads/) versão 3.9 ou superior.
+*Você precisará do software [Visual Studio Code](https://code.visualstudio.com/Download) instalado. Além da linguagem de programação [Python](https://www.python.org/downloads/) versão 3.9.
 * Baixe o [repositório](https://gitlab.com/GabrielFS1/processamento-aster) com os programas e bibliotecas requeridos e descompacte na pasta onde ficarão as imagens do processamento.
 
 
