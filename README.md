@@ -21,12 +21,9 @@ Para ir até o diretório no qual as pasta foram descompactadas. **File** > **Op
 Abra o terminal usando **Ctrl + '** e digite os comandos abaixo:
 
 ### Instalando Bibliotecas
+
 ```
 python -m pip install -r requirements.txt
-python -m pip install wheel
-python -m pip install GDAL-3.2.2-cp39-cp39-win_amd64.whl
-python -m pip install rasterio‑1.2.1‑cp39‑cp39‑win_amd64.whl GDAL‑3.2.2‑cp39‑cp39‑win_amd64.whl
-python -m pip install Cartopy‑0.19.0.post1‑cp39‑cp39‑win_amd64.whl
 ```
 
 ## Execução
