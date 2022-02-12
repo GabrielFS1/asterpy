@@ -23,6 +23,13 @@ layer_dir = path + '01_Layer_Stacking\\'
 index_dir = path + '02_Indices\\'
 
 def processing(file):
+
+    if ap.check_register(file): # Verifica se o arquivo ja está registrado no banco
+        if ap.check_final_checker(file): # Não da continuidade se o arquivo já foi finalizado
+            return
+    else:
+        ap.new_register(file) # Insere o arquivo no banco de dados
+
     print(f'\033[1;33mIniciando o processamento do arquivo\033[0m {file}')
 
     if os.path.isfile(layer_dir + file + '_Layer_Stacking.tif') == False:
@@ -93,20 +100,15 @@ if opt == '0':
 
 elif opt == '1':
     for file in os.listdir(files_dir):
-        if len(file.split(".")) == 1 and file.split("_")[0] == 'AST':
-            if ap.check_register(file): # Verifica se o arquivo ja está registrado no banco
-                if ap.check_final_checker(file): # Verifica se o arquivo já foi finalizado
-                    continue
-                else:
-                    processing(file)      
-            else:
-                ap.new_register(file)
-                processing(file)
+        if len(file.split(".")) == 1 and file.split("_")[0] == 'AST': # Verifica se o arquivo é uma pasta de um arquivo ASTER
+            processing(file)
         else:
             if file.split(".")[-1] == 'zip':
-                if file.split(".")[0] not in os.listdir(files_dir):
+                if file.split(".")[0] not in os.listdir(files_dir): # Verifica se o arquivo zip já não foi extraido
                     extract_zip(file)
-                    file = file.split(".")[0]     
+
+                processing(file.split(".")[0])
+
     print("\033[1;32mTodos os arquivos na pasta já foram processados, adicione outros arquivos. Para refazer uma cena utilize a opção 2 do menu.\033[0m\n")
 
 # Processa/Reprocessa um único arquivo por completo
@@ -117,8 +119,8 @@ elif opt == '2':
     file = None
 
     # Procura por todos os arquivos e compara os últimos digitos de cada um
-    for archive in os.listdir(files_dir): 
-        if archive.split('_')[-1] == num:  
+    for archive in os.listdir(files_dir):
+        if archive.split('_')[-1] == num:
             file = archive
             break
 
