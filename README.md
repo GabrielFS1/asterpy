@@ -2,25 +2,32 @@
 
 ## Recursos
 - [Instalação](Instalação)
-    - [Configurando o VS code](Configurando-o-VS-code)
+    - [Criando venv](Criando-o-venv)
     - [Instalando Bibliotecas](Instalando-Bibliotecas)
 - [Execução](Execução)
     - [Primeira Execução](Primeira-Execução)
     - [Parametros Editáveis](Parametros-Editáveis)
 
 ## Instalação
-*Você precisará do software [Visual Studio Code](https://code.visualstudio.com/Download) instalado. Além da linguagem de programação [Python](https://www.python.org/downloads/) versão 3.9.
+* Você precisará ter o [Python](https://www.python.org/downloads/) versão 3.9 instalado em sua máquina.
 * Baixe o [repositório](https://gitlab.com/GabrielFS1/processamento-aster) com os programas e bibliotecas requeridos e descompacte na pasta onde ficarão as imagens do processamento.
 
 
-### Configurando o VS code
-Com todos arquivos baixados prossiga para a instalação das bibliotecas. Inicialmente abra o Visual Studio Code e instale a extensão Python presionando **Ctrl + Shift + X** e digitando _python_, baixe a primeira extensão mostrada.
+### Criando o venv
+Com todos arquivos baixados prossiga para a instalação das bibliotecas. Inicialmente abra o Prompt de comando do windows digitando cmd na barra de pesquisa e vá até a pasta com os arquivos baixados utilizando `cd nomeDaPasta` até a que se chegue a pasta **asterpy**.
 
-Para ir até o diretório no qual as pasta foram descompactadas. **File** > **Open Folder** e selecione a pasta com os arquivos.
+Estando no diretório crie o venv usando python -m venv.
 
-Abra o terminal usando **Ctrl + '** e digite os comandos abaixo:
+Em caso de falha de permissões utilizar esse comando no **PowerShell** com permissão de administrador.
+
+```set-executionpolicy RemoteSigned```
+
+
+E para entrar no venv, ambiente virtual onde serão instaladas as bibliotecas, digite .\venv\Scripts\activate. Sera possível ver a escrita (venv) antes da especificação do diretório
 
 ### Instalando Bibliotecas
+
+Estando dentro do venv digite o comando 
 
 ```
 python -m pip install -r requirements.txt
@@ -29,7 +36,7 @@ python -m pip install -r requirements.txt
 ## Execução
 ### Primeira Execução
 
-Para iniciar a execução do programa digite o seguinte comando no terminal
+Para iniciar a execução do programa digite o seguinte comando no cmd
 
 ```python aster.py```
 
