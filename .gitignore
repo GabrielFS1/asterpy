@@ -3,3 +3,14 @@ __pycache__/
 *.py[cod]
 
 venv
+
+
+00_Arquivos
+01_Layer_Stacking
+02_Indices
+03_Histograma
+04_Mediana
+05_RGB
+06_Triplete
+07_Fotos_histograma
+08_Shapes
