@@ -3,6 +3,10 @@ import sys
 import os.path
 import shutil
 import asterpy as ap
+import warnings
+import rasterio
+
+warnings.filterwarnings("ignore", category=rasterio.errors.NotGeoreferencedWarning)
 
 # Resolução da composição coloridas das bandas VNIR
 resolution_merge = 60
