@@ -73,7 +73,7 @@ def histogram_image_save(file, path, index, dir, min, max):
     n, bins, patches = ax1.hist(normalize8(Z, min, max), bins=256, ec='red', fc='none', histtype='step')
 
     # Cria subtítulo com o nome do arquivo recortado
-    fig.suptitle(file + ' ' + index.split('.')[0][1:], color='white', fontsize=11)
+    fig.subtitle(file + ' ' + index.split('.')[0][1:], color='white', fontsize=11)
 
     plt.tight_layout()
 
@@ -81,13 +81,12 @@ def histogram_image_save(file, path, index, dir, min, max):
     plt.savefig(fotos_dir + dir + file + '_Histo' + index.split('.')[0] + '.jpg')
 
 def get_histogram_range(img_path):
+    """Applys image correction 'Linear 2%'"""
     # Abre a imagem
     im= Image.open(img_path)
 
     # Cria o array da imagem
     Z = np.array(im.getdata())
-
-    im = None
 
     Z = np.ma.masked_invalid(Z)
 
