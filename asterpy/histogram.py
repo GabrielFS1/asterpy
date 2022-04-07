@@ -73,7 +73,7 @@ def histogram_image_save(file, path, index, dir, min, max):
     n, bins, patches = ax1.hist(normalize8(Z, min, max), bins=256, ec='red', fc='none', histtype='step')
 
     # Cria subtítulo com o nome do arquivo recortado
-    fig.subtitle(file + ' ' + index.split('.')[0][1:], color='white', fontsize=11)
+    fig.suptitle(file + ' ' + index.split('.')[0][1:], color='white', fontsize=11)
 
     plt.tight_layout()
 
