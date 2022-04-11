@@ -10,7 +10,10 @@
 
 ## Instalação
 * Você precisará ter o [Python](https://www.python.org/downloads/) versão 3.9 instalado em sua máquina.
-* Baixe o [repositório](https://gitlab.com/GabrielFS1/processamento-aster) com os programas e bibliotecas requeridos e descompacte na pasta onde ficarão as imagens do processamento.
+
+
+### Clone o repositório
+Usando o Prompt de comando vá para a pasta desejada e use o comadno git clone para clonar o código
 
 
 ### Criando o venv
@@ -73,3 +76,5 @@ Cada valor definido para o recorte do histograma é armazenada em um banco de da
 
 
 
+## Download Imagens
+Para realizar o download das imagens ASTER é necessário acessar o site https://search.earthdata.nasa.gov/search e pesquisar pelo produto aster desejado.
