@@ -77,4 +77,4 @@ Cada valor definido para o recorte do histograma é armazenada em um banco de da
 
 
 ## Download Imagens
-Para realizar o download das imagens ASTER é necessário acessar o site https://search.earthdata.nasa.gov/search e pesquisar pelo produto aster desejado.
+Para realizar o download das imagens ASTER é necessário acessar o site https://search.earthdata.nasa.gov/search e pesquisar pelo produto aster desejado. Na busca é possível colocar alguns filtros como porcentagem de nuvens, periodo diurno, entre outros. Para selecionar a área, você pode fazer upload de um shape ou desenhar um polígono no mapa.
