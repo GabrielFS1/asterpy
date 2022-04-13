@@ -15,18 +15,19 @@
 ### Clone o repositório
 Usando o Prompt de comando vá para a pasta desejada e use o comadno git clone para clonar o código
 
+```git clone https://github.com/GabrielFS1/asterpy.git```
 
 ### Criando o venv
-Com todos arquivos baixados prossiga para a instalação das bibliotecas. Inicialmente abra o Prompt de comando do windows digitando cmd na barra de pesquisa e vá até a pasta com os arquivos baixados utilizando `cd nomeDaPasta` até a que se chegue a pasta **asterpy**.
+Com todos arquivos baixados prossiga para a instalação das bibliotecas. Abra o Prompt de comando do windows digitando cmd na barra de pesquisa e vá até a pasta `asterpy` utilizando `cd nomeDaPasta` até a que se chegue a pasta **asterpy**.
 
-Estando no diretório crie o venv usando python -m venv.
+Estando no diretório crie o venv usando 
+```python -m venv venv```
 
 Em caso de falha de permissões utilizar esse comando no **PowerShell** com permissão de administrador.
 
 ```set-executionpolicy RemoteSigned```
 
-
-E para entrar no venv, ambiente virtual onde serão instaladas as bibliotecas, digite .\venv\Scripts\activate. Sera possível ver a escrita (venv) antes da especificação do diretório
+Para ativar o ambiente virtual no qual serão instaladas as bibliotecas digite ```.\venv\Scripts\activate```. Sera possível ver a escrita (venv) antes da especificação do diretório.
 
 ### Instalando Bibliotecas
 
@@ -41,7 +42,7 @@ python -m pip install -r requirements.txt
 
 Para iniciar a execução do programa digite o seguinte comando no cmd
 
-```python aster.py```
+```python main.py```
 
 Na primeira execução o programa criará todas as pastas necessárias. As imagens brutas devem ser descompactadas na pasta **00_Arquivos**, no qual a pasta com as figuras deve conter o nome da cena. Ao executar o programa um menu com três opções será mostrada no qual podem ser selecionadas as seguintes opções:
 
@@ -73,7 +74,6 @@ A tela principal do programa é exibida em janelas sendo, o histograma interativ
 
 ### Tabela de dados
 Cada valor definido para o recorte do histograma é armazenada em um banco de dados contido no arquivo _aster_dados.db_. Uma alternativa para converter esse dados em um formato acessível, como excel é baixando o programa open source [DB Browser(SQLite)](https://sqlitebrowser.org/dl/) e exportando a tambela como CSV.
-
 
 
 ## Download Imagens
