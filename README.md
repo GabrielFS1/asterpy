@@ -21,7 +21,9 @@ Usando o Prompt de comando vá para a pasta desejada e use o comadno git clone p
 Com todos arquivos baixados prossiga para a instalação das bibliotecas. Abra o Prompt de comando do windows digitando cmd na barra de pesquisa e vá até a pasta `asterpy` utilizando `cd nomeDaPasta` até a que se chegue a pasta **asterpy**.
 
 Estando no diretório crie o venv usando o comando abaixo, uma pasta chamada venv será criada.
-```python -m venv venv```
+```
+python -m venv venv
+```
 
 Em caso de falha de permissões utilizar esse comando no **PowerShell** com permissão de administrador.
 
