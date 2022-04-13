@@ -25,11 +25,11 @@ Estando no diretório crie o venv usando o comando abaixo, uma pasta chamada ven
 python -m venv venv
 ```
 
-Em caso de falha de permissões utilizar esse comando no **PowerShell** com permissão de administrador.
+Para ativar o ambiente virtual no qual serão instaladas as bibliotecas digite ```.\venv\Scripts\activate```. Sera possível ver a escrita (venv) antes da especificação do diretório.
+
+Em caso de falha de permissão, utilize este comando no **PowerShell** com permissão de administrador.
 
 ```set-executionpolicy RemoteSigned```
-
-Para ativar o ambiente virtual no qual serão instaladas as bibliotecas digite ```.\venv\Scripts\activate```. Sera possível ver a escrita (venv) antes da especificação do diretório.
 
 ### Instalando Bibliotecas
 
