@@ -6,6 +6,7 @@ import asterpy as ap
 import warnings
 import rasterio
 
+from asterpy import database, auto
 warnings.filterwarnings("ignore", category=rasterio.errors.NotGeoreferencedWarning)
 
 # Resolução da composição coloridas das bandas VNIR
@@ -36,11 +37,9 @@ def processing(file):
 
     print(f'\033[1;33mIniciando o processamento do arquivo\033[0m {file}')
 
-    if os.path.isfile(layer_dir + file + '_Layer_Stacking.tif') == False:
-        ap.layer_stack(file, path)
+    ap.layer_stack(file, path)
 
-    if os.path.isfile(index_dir + phyll_dir + file + '_Phyll.tif') == False or  os.path.isfile(index_dir + npv_dir + file + '_Npv.tif') == False or os.path.isfile(index_dir + qtz_dir + file + '_Qtz.tif') == False:
-        ap.index_calc(file, path)
+    ap.index_calc(file, path)
 
     # Composição colorida com as bandas 1, 2 e 3
     ap.merge_bands_vnir(file, path, resolution_merge)
@@ -50,20 +49,69 @@ def processing(file):
         if i == 0:
             dir = phyll_dir
             index = '_Phyll.tif'
-            func = ap.insert_phyll
+            func = database.insert_phyll
 
         elif i == 1:
             dir = npv_dir
             index = '_Npv.tif'
-            func = ap.insert_npv
+            func = database.insert_npv
 
         elif i == 2:
             dir = qtz_dir
             index = '_Qtz.tif'
-            func = ap.insert_qtz
+            func = database.insert_qtz
 
         # Gera o histograma ajustável da imagem
         ap.threshold_adjust_window(file, path, dir, index, func)
+
+    # Filtro de mediana
+    ap.median_filter(file, path)
+
+    # Aplica mascara RGB para a imagem
+    ap.color_mapping(file, path)
+
+    # Mescla as três medianas em um arquivo rgb
+    ap.triplete_image(file, path)
+
+    # Gera a figura do index antes do threshold
+    ap.generate_index_image(file, path)
+
+    # Atualiza o banco de dados classificando cena como finalizada
+    ap.image_complete(file)
+
+    print(f'\033[32mArquivo {file} finalizado!\033[m')
+
+def auto_process():
+    if ap.check_register(file): # Verifica se o arquivo ja está registrado no banco
+        if ap.check_final_checker(file): # Não da continuidade se o arquivo já foi finalizado
+            return
+    else:
+        ap.new_register(file) # Insere o arquivo no banco de dados
+
+    print(f'\033[1;33mIniciando o processamento do arquivo\033[0m {file}')
+
+    ap.layer_stack(file, path)
+
+    ap.index_calc(file, path)
+
+
+    for i in range(0, 3):
+        if i == 0:
+            min, max = auto.auto_threshold(f"{index_dir}\\01_Phyll\\{file}_Phyll.tif", file, "03_Histograma", "phyll")
+            index = 'phyll'
+            
+            database.insert_phyll(file, f"{min}:{max}")
+
+        elif i == 1:
+            min, max = auto.auto_threshold(f"{index_dir}\\02_Npv\\{file}_Npv.tif", file, "03_Histograma", "npv")
+            index = '_Npv.tif'
+            database.insert_npv(file, f"{min}:{max}")
+
+        elif i == 2:
+            min, max = auto.auto_threshold(f"{index_dir}\\03_Qtz\\{file}_Qtz.tif", file, "03_Histograma", "qtz")
+            index = '_qtz'
+            database.insert_qtz(file, f"{min}:{max}")
+
 
     # Filtro de mediana
     ap.median_filter(file, path)
