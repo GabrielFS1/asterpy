@@ -9,6 +9,7 @@ import sys
 import os
 import numpy as np
 
+import auto_histo
 
 def threshold_adjust_window(file, path, dir, index, func):
     files_dir = path + '00_Arquivos\\'
@@ -289,7 +290,21 @@ def threshold_adjust_window(file, path, dir, index, func):
 
     max_thres = Z.max()
 
-    min, max = ap.get_histogram_range(img_in)
+    # Defines the fist value of the histogram
+    #min, max = ap.get_histogram_range(img_in)
+    print('====')
+    print(index)
+
+    if 'Phyll' in index:
+        type = 'phyll'
+    if 'Npv' in index:
+        type = 'npv'
+    if 'Qtz' in index:
+        type = 'qtz'
+
+    period = auto_histo.get_period(file)
+    months = auto_histo.get_months(file)
+    min, max = auto_histo.get_min_max(type, period, months)
 
     ds = rasterio.open(img_in)
     index_array = ds.read(1)
