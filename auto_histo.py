@@ -12,10 +12,8 @@ import numpy as np
 from PIL import Image
 
 
-
-
 def get_min_max(type: str=None, period: str=None, months: str=None):
-    db = sqlite3.connect("aster_dados.db", uri=True)
+    db = sqlite3.connect("C:\\Users\\Lais\\Documents\\git\\000\\aster_dados.db", uri=True)
     rows = db.execute("SELECT * FROM aster_data").fetchall()
 
     if type:
@@ -63,9 +61,7 @@ def get_min_max(type: str=None, period: str=None, months: str=None):
             sum_max += float(row[index].split(':')[1]) 
             qtd += 1
 
-    print(round(sum_min / qtd, 3))
-    print(round(sum_max / qtd, 3))
-
+    print(f"qtd de pontos: {qtd}")
     return round(sum_min / qtd, 3), round(sum_max / qtd, 3)
 
 def get_period(filename: str=None):
@@ -149,7 +145,6 @@ def auto_process():
             min, max = get_min_max('phyll', period, months)
             subprocess.call(['gdal_translate.exe', '-ot', 'Byte', '-quiet' ,'-scale', str(min), str(max), f"{inpath}\\{file}", f"Teste\\Histo_{file}"])
 
-            
             #im = Image.open(f"03_Histograma\\0{i + 1}_{type}\\{file}_Histo_{}.tif")
             #im.show()
 
@@ -186,3 +181,60 @@ def auto_process():
 
         control += 1
         """
+
+def compare(file: str=None, type: str=None):
+    if not type:
+        return print(f"=== Please inform a type ===")
+
+    if not file:
+        return print(f"=== Please inform a file ===")
+
+    # Check if the file is already unziped
+    if file not in os.listdir("00_Arquivos"): # Verifica se o arquivo zip já foi extraido
+        shutil.unpack_archive(f"00_Arquivos\\{file}.zip", f"00_Arquivos\\{file}")
+        print(f"file unpacked")
+
+    out_folder = f"Teste\\{file}_{type}\\"
+    try:
+        os.mkdir(f"Teste\\{file}_{type}\\")
+        os.mkdir(out_folder)
+    except FileExistsError:
+        pass
+
+    if type == 'phyll':
+        dir = '01_Phyll'
+
+    if type == 'npv':
+        dir = '02_Npv'
+
+    if type == 'qtz':
+        dir = '03_Qtz'
+
+    # 02_Indices\01_Phyll\AST_L1B_00301022014012358_20200213112936_20968_Phyll.tif
+    layer_dir = f"01_Layer_Stacking\\{file}_Layer_Stacking.tif"
+    index_dir = f"02_Indices\\{dir}\\{file}_{type.capitalize()}.tif"
+
+    # Checks if there is index image
+    if not os.path.isfile(index_dir):
+        if not os.path.isfile(layer_dir):
+            #make layer stack image
+            print(f"***********************")
+            print(f"Fazendo Layer Stack para {file}")
+            ap.layer_stack(file, '')
+        # makes index image
+        print(f"Fazendo Índice")
+        ap.index_calc(file, '')
+
+    period = get_period(file)
+    months = get_months(file)
+
+    # Makes the threshold clipping using only period
+    min, max = get_min_max(type, period)
+    subprocess.call(['gdal_translate.exe', '-ot', 'Byte', '-quiet' ,'-scale', str(min), str(max), index_dir, f"{out_folder}\\{file}_{type}_Period.tif"])
+    print(f"1 - min: {min} max: {max}")
+    # Makes the threshold clipping using period and months
+    min, max = get_min_max(type, period, months)
+    subprocess.call(['gdal_translate.exe', '-ot', 'Byte', '-quiet' ,'-scale', str(min), str(max), index_dir, f"{out_folder}\\{file}_{type}_Periodo_e_Meses.tif"])
+    print(f"2 - min: {min} max: {max}")
+
+compare("AST_L1B_00308132009131803_20200213112625_13869", "phyll")
