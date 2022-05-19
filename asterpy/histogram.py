@@ -81,13 +81,12 @@ def histogram_image_save(file, path, index, dir, min, max):
     plt.savefig(fotos_dir + dir + file + '_Histo' + index.split('.')[0] + '.jpg')
 
 def get_histogram_range(img_path):
+    """Applys image correction 'Linear 2%'"""
     # Abre a imagem
     im= Image.open(img_path)
 
     # Cria o array da imagem
     Z = np.array(im.getdata())
-
-    im = None
 
     Z = np.ma.masked_invalid(Z)
 

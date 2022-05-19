@@ -140,6 +140,10 @@ elif opt == '2':
         print("\033[1;31mArquivo não encontrado\033[0m\n")
         sys.exit()
 
+    if file.split('.')[-1] == 'zip':
+        extract_zip(file + '.zip')
+
+    file = file.split('.')[0]
     # Incia o processamento do arquivo
     print(f'\033[1;33mIniciando o processamento do arquivo \033[0m{file}')
     
