@@ -1,3 +1,6 @@
+from pathlib import Path
+import subprocess
+from typing import Union
 from PIL import Image
 import matplotlib.pyplot as plt
 import numpy as np
@@ -80,9 +83,11 @@ def histogram_image_save(file, path, index, dir, min, max):
     # Salva a figura
     plt.savefig(fotos_dir + dir + file + '_Histo' + index.split('.')[0] + '.jpg')
 
-def get_histogram_range(img_path):
+def value_linear_2_percent(filename):
+    """Get the minimum and maximum values for a Linear Percent Stretch"""
+
     # Abre a imagem
-    im= Image.open(img_path)
+    im= Image.open(filename)
 
     # Cria o array da imagem
     Z = np.array(im.getdata())
@@ -91,7 +96,7 @@ def get_histogram_range(img_path):
 
     Z = np.ma.masked_invalid(Z)
 
-    if '_Phyll' in img_path or '_Npv' in img_path or '_Qtz' in img_path:
+    if '_Phyll' in filename or '_Npv' in filename or '_Qtz' in filename:
         bins_list = 256
         arg = False
     else:
@@ -133,7 +138,7 @@ def get_histogram_range(img_path):
                 if error_max < smll_error_max:
                     smll_error_max = error_max
                     max_value = bins[i]
-                
+
                 if points/total*100 > 99:
                     plt.close(fig)
                     smll_error_max = smll_error_min = error_min = error_max = bins = total = None
@@ -169,5 +174,13 @@ def get_histogram_range(img_path):
                     plt.close(fig)
                     # Limpa vaiáveis    
                     smll_error_max = smll_error_min = error_min = error_max = bins = total = None
-                    return [round(min_value, 3), round(max_value, 3)]
+                    return min_value, max_value
     return get_values(Z, arg)
+
+def apply_linear_filer(filename: Union[str, Path], outpath: Union[str, Path]='', output_filename: str=''):
+    """Applys the Linear 2% Stretch to the data to make possible to see the image
+
+    obs: Method used by ENVI to display the original image"""
+
+    min, max = value_linear_2_percent(filename)
+    subprocess.call(['gdal_translate.exe', '-ot', 'Byte', '-quiet', '-scale', str(min), str(max), filename, outpath + output_filename + '.tif'])
