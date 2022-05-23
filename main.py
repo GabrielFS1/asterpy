@@ -1,7 +1,9 @@
 import os
+from pathlib import Path
 import sys
 import os.path
 import shutil
+from typing import List
 import asterpy as ap
 import warnings
 import rasterio
@@ -34,10 +36,14 @@ def processing(file):
     else:
         ap.new_register(file) # Insere o arquivo no banco de dados
 
-    print(f'\033[1;33mIniciando o processamento do arquivo\033[0m {file}')
-
-    if os.path.isfile(layer_dir + file + '_Layer_Stacking.tif') == False:
-        ap.layer_stack(file, path)
+    bands_files: List[Path] = [
+        f"00_Arquivos\\{file}\\{file}.TIR_Swath.ImageData10.tif",
+        f"00_Arquivos\\{file}\\{file}.TIR_Swath.ImageData11.tif",
+        f"00_Arquivos\\{file}\\{file}.TIR_Swath.ImageData12.tif",
+        f"00_Arquivos\\{file}\\{file}.TIR_Swath.ImageData13.tif",
+        f"00_Arquivos\\{file}\\{file}.TIR_Swath.ImageData14.tif"
+    ]
+    layer_stack = ap.layer_stack(bands_files, file)
 
     if os.path.isfile(index_dir + phyll_dir + file + '_Phyll.tif') == False or  os.path.isfile(index_dir + npv_dir + file + '_Npv.tif') == False or os.path.isfile(index_dir + qtz_dir + file + '_Qtz.tif') == False:
         ap.index_calc(file, path)
