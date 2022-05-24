@@ -1,3 +1,4 @@
+from inspect import stack
 import os
 from pathlib import Path
 import sys
@@ -8,6 +9,8 @@ import asterpy as ap
 import warnings
 import rasterio
 
+from asterpy import layer_stacking, band_calc, database, directories
+
 warnings.filterwarnings("ignore", category=rasterio.errors.NotGeoreferencedWarning)
 
 # Resolução da composição coloridas das bandas VNIR
@@ -17,7 +20,7 @@ resolution_merge = 60
 path = ''
 
 # Cria os diretórios se não existir 
-ap.directory_maker(path)
+directories.directory_maker(path)
 
 # Caminhos para os diretórios que contém os três índices
 phyll_dir = '01_Phyll\\'
@@ -30,11 +33,11 @@ index_dir = path + '02_Indices\\'
 
 def processing(file):
 
-    if ap.check_register(file): # Verifica se o arquivo ja está registrado no banco
-        if ap.check_final_checker(file): # Não da continuidade se o arquivo já foi finalizado
+    if database.check_register(file): # Verifica se o arquivo ja está registrado no banco
+        if database.check_final_checker(file): # Não da continuidade se o arquivo já foi finalizado
             return
     else:
-        ap.new_register(file) # Insere o arquivo no banco de dados
+        database.new_register(file) # Insere o arquivo no banco de dados
 
     bands_files: List[Path] = [
         f"00_Arquivos\\{file}\\{file}.TIR_Swath.ImageData10.tif",
@@ -43,10 +46,16 @@ def processing(file):
         f"00_Arquivos\\{file}\\{file}.TIR_Swath.ImageData13.tif",
         f"00_Arquivos\\{file}\\{file}.TIR_Swath.ImageData14.tif"
     ]
-    layer_stack = ap.layer_stack(bands_files, file)
+    layer_stack_img = layer_stacking.layer_stack(bands_files, 'Teste\\layer_test.tif')
 
-    if os.path.isfile(index_dir + phyll_dir + file + '_Phyll.tif') == False or  os.path.isfile(index_dir + npv_dir + file + '_Npv.tif') == False or os.path.isfile(index_dir + qtz_dir + file + '_Qtz.tif') == False:
-        ap.index_calc(file, path)
+    phyll_img = band_calc.phyll_calc(layer_stack_img, file + '_Phyll', 'Teste')
+    npv_img = band_calc.npv_calc(layer_stack_img, file + '_Npv', 'Teste')
+    qtz_img = band_calc.qtz_calc(layer_stack_img, file + '_Qtz', 'Teste')
+
+    print(phyll_img)
+    print(npv_img)
+    print(qtz_img)
+    return
 
     # Composição colorida com as bandas 1, 2 e 3
     ap.merge_bands_vnir(file, path, resolution_merge)
@@ -115,11 +124,11 @@ elif opt == '1':
         else:
             if file.split(".")[-1] == 'zip' and file.split("_")[0] == 'AST':
                 file = file.split(".")[0]
-                if ap.check_register(file): # Verifica se o arquivo ja está registrado no banco
-                    if ap.check_final_checker(file): # Não da continuidade se o arquivo já foi finalizado
+                if database.check_register(file): # Verifica se o arquivo ja está registrado no banco
+                    if database.check_final_checker(file): # Não da continuidade se o arquivo já foi finalizado
                         continue
                 else:
-                    ap.new_register(file) # Insere o arquivo no banco de dados
+                    database.new_register(file) # Insere o arquivo no banco de dados
 
                 if file not in os.listdir(files_dir): # Verifica se o arquivo zip já foi extraido
                     extract_zip(file + '.zip')
