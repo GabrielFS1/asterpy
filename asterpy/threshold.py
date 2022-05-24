@@ -1,3 +1,5 @@
+from pathlib import Path
+from typing import Union
 import asterpy as ap
 import cv2 as cv2
 from PIL import Image
@@ -9,6 +11,9 @@ import sys
 import os
 import numpy as np
 
+def thredhold_image(infile: Union[str, Path], outpath: Union[str, Path], min: float, max: float):
+    subprocess.call(['gdal_translate.exe', '-ot', 'Byte', '-quiet', '-scale', str(min), str(max), infile, outpath])
+    return outpath
 
 def threshold_adjust_window(file, path, dir, index, func):
     files_dir = path + '00_Arquivos\\'
