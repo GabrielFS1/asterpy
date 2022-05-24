@@ -2,6 +2,7 @@ from calendar import month
 import glob
 import shutil
 import subprocess
+from typing import List
 import cv2
 import rasterio
 import asterpy as ap
@@ -10,10 +11,11 @@ import os
 from osgeo import gdal
 import numpy as np
 from PIL import Image
+import statistics
 
 
 def get_min_max(type: str=None, period: str=None, months: str=None):
-    db = sqlite3.connect("C:\\Users\\Lais\\Documents\\git\\000\\aster_dados.db", uri=True)
+    db = sqlite3.connect("D:\\GG\\git\\asterpy\\aster_dados.db", uri=True)
     rows = db.execute("SELECT * FROM aster_data").fetchall()
 
     if type:
@@ -43,8 +45,8 @@ def get_min_max(type: str=None, period: str=None, months: str=None):
         elif months == 'seco':
             months = [10, 11, 12, 1, 2] # Oct - Feb
 
-    sum_min = sum_max = qtd = 0
-
+    min_values: List[float] = []
+    max_values: List[float] = []
     # Calculates the minimum value from the database
     for row in rows:
         if row[index]:
@@ -57,12 +59,18 @@ def get_min_max(type: str=None, period: str=None, months: str=None):
             if months and img_month not in months:
                 continue
 
-            sum_min += float(row[index].split(':')[0]) 
-            sum_max += float(row[index].split(':')[1]) 
-            qtd += 1
+            min_values.append(float(row[index].split(':')[0]))
+            max_values.append(float(row[index].split(':')[1]))
 
-    print(f"qtd de pontos: {qtd}")
-    return round(sum_min / qtd, 3), round(sum_max / qtd, 3)
+    mean_min = statistics.mean(min_values)
+    mean_max = statistics.mean(max_values)
+
+    median_min = statistics.median(min_values)
+    median_max = statistics.median(max_values)
+
+    min = median_min
+    max = median_max
+    return min, max
 
 def get_period(filename: str=None):
     if not filename:
@@ -108,19 +116,19 @@ def auto_process():
 
         if i == 0:
             inpath = "02_Indices\\01_Phyll\\"
-            type = "Phyll"
+            type = "phyll"
 
             #file = open(f'Teste\\Histo_mean_Phyll.txt', 'w')
 
         if i == 1:
             inpath = "02_Indices\\02_Npv\\"
-            type = "Npv"
+            type = "npv"
 
             #file = open(f'Teste\\Histo_mean_Npv.txt', 'w')
 
         if i == 2:
             inpath = "02_Indices\\03_Qtz\\"
-            type = "Qtz"
+            type = "qtz"
             #file = open(f'Teste\\_Qtz.txt', 'w')
 
         files = os.listdir(inpath)
@@ -142,7 +150,7 @@ def auto_process():
                 period = 'noite'
 
             # Makes the threshold clipping
-            min, max = get_min_max('phyll', period, months)
+            min, max = get_min_max(type, period, months)
             subprocess.call(['gdal_translate.exe', '-ot', 'Byte', '-quiet' ,'-scale', str(min), str(max), f"{inpath}\\{file}", f"Teste\\Histo_{file}"])
 
             #im = Image.open(f"03_Histograma\\0{i + 1}_{type}\\{file}_Histo_{}.tif")
@@ -237,4 +245,5 @@ def compare(file: str=None, type: str=None):
     subprocess.call(['gdal_translate.exe', '-ot', 'Byte', '-quiet' ,'-scale', str(min), str(max), index_dir, f"{out_folder}\\{file}_{type}_Periodo_e_Meses.tif"])
     print(f"2 - min: {min} max: {max}")
 
-compare("AST_L1B_00308132009131803_20200213112625_13869", "phyll")
+#compare("AST_L1B_00308132009131803_20200213112625_13869", "phyll")
+auto_process()
