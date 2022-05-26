@@ -11,6 +11,8 @@ import sys
 import os
 import numpy as np
 
+from asterpy import histogram
+
 def thredhold_image(infile: Union[str, Path], outpath: Union[str, Path], min: float, max: float):
     subprocess.call(['gdal_translate.exe', '-ot', 'Byte', '-quiet', '-scale', str(min), str(max), infile, outpath])
     return outpath
@@ -294,7 +296,7 @@ def threshold_adjust_window(file, path, dir, index, func):
 
     max_thres = Z.max()
 
-    min, max = ap.get_histogram_range(img_in)
+    min, max = histogram.get_histogram_range(img_in)
 
     ds = rasterio.open(img_in)
     index_array = ds.read(1)
