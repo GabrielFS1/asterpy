@@ -7,6 +7,7 @@ import shutil
 from typing import List
 import asterpy as ap
 import warnings
+from asterpy import threshold
 import rasterio
 
 from asterpy import layer_stacking, band_calc, database, directories
@@ -17,19 +18,18 @@ warnings.filterwarnings("ignore", category=rasterio.errors.NotGeoreferencedWarni
 resolution_merge = 60
 
 # Define o diretório padrão onde as pastas ficarão salvas
-path = ''
 
 # Cria os diretórios se não existir 
-directories.directory_maker(path)
+directories.directory_maker()
 
 # Caminhos para os diretórios que contém os três índices
 phyll_dir = '01_Phyll\\'
 npv_dir = '02_Npv\\'
 qtz_dir = '03_Qtz\\'
-
-files_dir = path + '00_Arquivos\\'
-layer_dir = path + '01_Layer_Stacking\\'
-index_dir = path + '02_Indices\\'
+path = ''
+files_dir = '00_Arquivos\\'
+layer_dir = '01_Layer_Stacking\\'
+index_dir = '02_Indices\\'
 
 def processing(file):
 
@@ -48,43 +48,38 @@ def processing(file):
     ]
     layer_stack_img = layer_stacking.layer_stack(bands_files, 'Teste\\layer_test.tif')
 
-    phyll_img = band_calc.phyll_calc(layer_stack_img, file + '_Phyll', 'Teste')
-    npv_img = band_calc.npv_calc(layer_stack_img, file + '_Npv', 'Teste')
-    qtz_img = band_calc.qtz_calc(layer_stack_img, file + '_Qtz', 'Teste')
+    phyll_img = band_calc.phyll_calc(layer_stack_img, f"02_Indices\\01_Phyll\\{file}_Phyll.tif")
+    npv_img = band_calc.npv_calc(layer_stack_img, f"02_Indices\\02_Npv\\{file}_Npv.tif")
+    qtz_img = band_calc.qtz_calc(layer_stack_img, f"02_Indices\\03_Qtz\\{file}_Qtz.tif")
 
-    print(phyll_img)
-    print(npv_img)
-    print(qtz_img)
-    return
-
-    # Composição colorida com as bandas 1, 2 e 3
-    ap.merge_bands_vnir(file, path, resolution_merge)
+    ## Composição colorida com as bandas 1, 2 e 3
+    #ap.merge_bands_vnir(file, path, resolution_merge)
 
     print("Iniciando o processamento do histograma, após o ajuste, clique com o botão direito do mouse na maior imagem a sua esquerda")
     for i in range(0, 3):
         if i == 0:
             dir = phyll_dir
             index = '_Phyll.tif'
-            func = ap.insert_phyll
+            func = database.insert_phyll
 
         elif i == 1:
             dir = npv_dir
             index = '_Npv.tif'
-            func = ap.insert_npv
+            func = database.insert_npv
 
         elif i == 2:
             dir = qtz_dir
             index = '_Qtz.tif'
-            func = ap.insert_qtz
+            func = database.insert_qtz
 
         # Gera o histograma ajustável da imagem
-        ap.threshold_adjust_window(file, path, dir, index, func)
+        threshold.threshold_adjust_window(file, path, dir, index, func)
 
     # Filtro de mediana
-    ap.median_filter(file, path)
+    ap.median_filter(file)
 
     # Aplica mascara RGB para a imagem
-    ap.color_mapping(file, path)
+    ap.color_mapping(file)
 
     # Mescla as três medianas em um arquivo rgb
     ap.triplete_image(file, path)
