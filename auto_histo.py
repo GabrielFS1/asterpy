@@ -1,19 +1,25 @@
 import glob
+from inspect import stack
+from pathlib import Path
 import shutil
 import subprocess
-from typing import List
+from typing import List, Union
 import cv2
 import rasterio
-import asterpy as ap
+#import asterpy as ap
+from asterpy import band_calc, layer_stacking
 import sqlite3
 import os
 from osgeo import gdal
 import numpy as np
 from PIL import Image
 import statistics
+from matplotlib import pyplot as plt
+
+from os.path import exists
 
 
-def get_min_max(type: str=None, period: str=None, months: str=None):
+def get_min_max(type: str=None, period: str=None, months: str=None, operation: str=None, ):
     db = sqlite3.connect("D:\\GG\\git\\asterpy\\aster_dados.db", uri=True)
     rows = db.execute("SELECT * FROM aster_data").fetchall()
 
@@ -61,14 +67,14 @@ def get_min_max(type: str=None, period: str=None, months: str=None):
             min_values.append(float(row[index].split(':')[0]))
             max_values.append(float(row[index].split(':')[1]))
 
-    mean_min = statistics.mean(min_values)
-    mean_max = statistics.mean(max_values)
-
-    median_min = statistics.median(min_values)
-    median_max = statistics.median(max_values)
-
-    min = median_min
-    max = median_max
+    if operation == 'mean':
+        min = statistics.mean(min_values)
+        max = statistics.mean(max_values)
+    elif operation == 'median':
+        min = statistics.median(min_values)
+        max = statistics.median(max_values)
+    else:
+        return ValueError("The operation informed is invalid")
     return min, max
 
 def get_period(filename: str=None):
@@ -180,6 +186,110 @@ def auto_process():
         control += 1
         """
 
+def search_img(dir , img):
+    for file in dir:
+        if img in file:
+            return True
+    return False
+
+
+def create_comparison_image(type: str):
+
+    if type == 'phyll':
+        in_dir = 'D:\\GG\\documents\\Processadas-20220527T141701Z-001\\Processadas\\Phyll\\'
+        index_dir = 'D:\\GG\\git\\asterpy\\02_Indices\\01_Phyll'
+    elif type == 'npv':
+        in_dir = 'D:\\GG\\documents\\Processadas-20220527T141701Z-001\\Processadas\\Npv\\'
+        index_dir = 'D:\\GG\\git\\asterpy\\02_Indices\\02_Npv'
+
+    elif type == 'qtz':
+        in_dir = 'D:\\GG\\documents\\Processadas-20220527T141701Z-001\\Processadas\\Qtz\\'
+        index_dir = 'D:\\GG\\git\\asterpy\\02_Indices\\03_Qtz'
+
+    # Gets list of processed images
+    imgs = os.listdir(in_dir)
+
+    index_imgs = os.listdir(index_dir)
+
+    for img in imgs:
+        img_name = img[0:img.find('RGB') - 1]
+
+
+        # if the index image was not already created
+        if not search_img(index_imgs, img_name):
+            if not os.path.isdir(f"D:\\GG\\git\\asterpy\\00_Arquivos\\{img_name}\\"):
+                shutil.unpack_archive(f"D:\\GG\\git\\asterpy\\00_Arquivos\\{img_name}.zip", f"D:\\GG\\git\\asterpy\\00_Arquivos\\{img_name}")
+            # Create the layer stack
+            bands_files: List[Path] = [
+                f"D:\\GG\\git\\asterpy\\00_Arquivos\\{img_name}\\{img_name}.TIR_Swath.ImageData10.tif",
+                f"D:\\GG\\git\\asterpy\\00_Arquivos\\{img_name}\\{img_name}.TIR_Swath.ImageData11.tif",
+                f"D:\\GG\\git\\asterpy\\00_Arquivos\\{img_name}\\{img_name}.TIR_Swath.ImageData12.tif",
+                f"D:\\GG\\git\\asterpy\\00_Arquivos\\{img_name}\\{img_name}.TIR_Swath.ImageData13.tif",
+                f"D:\\GG\\git\\asterpy\\00_Arquivos\\{img_name}\\{img_name}.TIR_Swath.ImageData14.tif"
+            ]
+            layer_stack_img = layer_stacking.layer_stack(bands_files, 'Teste\\layer_test.tif')
+
+            if type == 'phyll':
+                index_img = band_calc.phyll_calc(layer_stack_img, f"Teste\\{img_name}_Phyll.tif")
+            elif type == 'npv':
+                index_img = band_calc.npv_calc(layer_stack_img, f"Teste\\{img_name}_Npv.tif")
+            elif type == 'qtz':
+                index_img = band_calc.qtz_calc(layer_stack_img, f"Teste\\{img_name}_Qtz.tif")
+        else:
+            if type == 'phyll':
+                index_img = f'D:\\GG\\git\\asterpy\\02_Indices\\01_Phyll\\{img_name}_Phyll.tif'
+            elif type == 'npv':
+                index_img = f'D:\\GG\\git\\asterpy\\02_Indices\\02_Npv\\{img_name}_Npv.tif'
+            elif type == 'qtz':
+                index_img = f'D:\\GG\\git\\asterpy\\02_Indices\\03_Qtz\\{img_name}_Qtz.tif'
+
+
+        period = get_period(img_name)
+        months = get_months(img_name)
+
+        # Create the comparison image
+        f, axs = plt.subplots(1, 3, figsize=(20,7)) 
+        plt.figure(dpi=1200)
+
+
+        # Threshold the image with the mean
+        min, max = get_min_max(type, period, months, 'mean')
+        subprocess.call(['gdal_translate.exe', '-ot', 'Byte', '-quiet' ,'-scale', str(min), str(max), index_img, f"Teste\\mean.tif"])
+
+        im1 = cv2.imread("Teste\\mean.tif")
+        plt.subplot(1, 3, 1)
+        plt.imshow(im1)
+        plt.title('Media')
+        plt.axis('off')
+
+        # Threshold the image with the median
+        min, max = get_min_max(type, period, months, 'median')
+        subprocess.call(['gdal_translate.exe', '-ot', 'Byte', '-quiet' ,'-scale', str(min), str(max), index_img, f"Teste\\median.tif"])
+        im2 = cv2.imread("Teste\\median.tif")
+        plt.subplot(1, 3, 2)
+        plt.imshow(im2)
+        plt.title('Mediana')
+        plt.axis('off')
+
+
+        im3 = cv2.imread(in_dir + img)
+        plt.subplot(1, 3, 3)
+        plt.imshow(im3)
+        plt.title('RGB')
+        plt.axis('off')
+
+        #plt.show()
+        plt.savefig(f"Teste\\{type}\\{img_name}_{type.capitalize()}.png")
+
+        plt.close()
+
+        os.remove(f"Teste\\mean.tif")
+        os.remove(f"Teste\\median.tif")
+
+
+
+
+
 def compare(file: str=None, type: str=None):
     if not type:
         return print(f"=== Please inform a type ===")
@@ -236,4 +346,7 @@ def compare(file: str=None, type: str=None):
     print(f"2 - min: {min} max: {max}")
 
 #compare("AST_L1B_00308132009131803_20200213112625_13869", "phyll")
-auto_process()
+
+#create_comparison_image('phyll')
+#create_comparison_image('npv')
+create_comparison_image('qtz')
